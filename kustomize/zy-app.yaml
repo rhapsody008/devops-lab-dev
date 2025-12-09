@@ -1,23 +1,38 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: zy-app
   labels:
     app: zy-app
-  name: zy-app
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: zy-app
-  strategy: {}
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: zy-app
     spec:
       containers:
-      - image: nginx:latest
-        name: nginx
-        resources: {}
-status: {}
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - name: http
+              containerPort: 80
+          resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zy-app-svc
+  labels:
+    app: zy-app
+spec:
+  selector:
+    app: zy-app
+  ports:
+    - name: http
+      port: 8081         # Service port exposed inside the cluster
+      targetPort: 80     # Container port in the pod
+  type: ClusterIP        # Default; change to NodePort/LoadBalancer if needed
