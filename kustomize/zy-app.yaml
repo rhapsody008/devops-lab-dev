@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zy-app
+  namespace: zyproj
   labels:
     app: zy-app
 spec:
@@ -21,11 +22,13 @@ spec:
             - name: http
               containerPort: 80
           resources: {}
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: zy-app-svc
+  namespace: zyproj
   labels:
     app: zy-app
 spec:
@@ -36,3 +39,24 @@ spec:
       port: 8081         # Service port exposed inside the cluster
       targetPort: 80     # Container port in the pod
   type: ClusterIP        # Default; change to NodePort/LoadBalancer if needed
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: kommander-traefik
+    traefik.ingress.kubernetes.io/router.tls: "false"
+  name: zy-app-ingress
+  namespace: zyproj
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: zy-app-svc
+            port:
+              number: 8081
+        path: /zy
+        pathType: Prefix
