@@ -2,12 +2,27 @@
 
 ## User Experience
 
+1. Check the web page, k8s dashboard to see existing running app
+2. Setup the repository  
+```
+git clone git@github.com:rhapsody008/devops-lab-dev.git
+git checkout user01
+```
+2. make changes to server.js 
+3. commit changes
+```
+(Optional) git status / git diff
+git add server.js
+git commit -m "Updates for User01"
+git push origin user01
+```
+4. Wait and see the changes reflected on web page
 
 ## Workflow Explained
 
 ### Diagram
 
-![workflow.uml](./workflow.uml)
+![CI/CD Workflow](.github/workflow.svg)
 
 ### CI - Docker Image Build
 1. A simple NodeJS app with Dockerfile present, with message printed & displayed on web server from [server.js](./server.js)
@@ -24,11 +39,14 @@
 
 3. After deployment completed (usually up to 3 minutes), the web page is updated with the change.
 
+## To Do
 
+1. Git Credentials - SSH? to be injected
+2. Workload/Performance, runner environment - to be settled
 
 ## Reference
 
 - NKP mgmt cluster CD configuration example: 
 
-![NKP mgmt cluster CD configuration](./.github/image.png)
+![NKP mgmt cluster CD configuration](.github/image.png)
 
