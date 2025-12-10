@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - "user01"
+      - "user02"
 
 env:
   # Configuration - to change to Harbor once it's available
@@ -13,11 +14,7 @@ env:
   
   # GitOps Configuration
   GITOPS_REPO: "rhapsody008/devops-lab-gitops"
-  CONFIG_REPO_BRANCH: "user01"
   KUSTOMIZE_DIR: "workloads"
-  
-  # The branch that triggers this workflow
-  TRIGGER_BRANCH: "user01"
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -63,7 +60,7 @@ jobs:
           # We need a token with write access to push changes back
           repository: ${{ env.GITOPS_REPO }}
           token: ${{ secrets.ACCESS_TOKEN }} 
-          ref: ${{ env.CONFIG_REPO_BRANCH }}
+          ref: ${{ github.ref_name }}
 
       - name: Set Short SHA as TAG
         run: echo "TAG=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
@@ -81,11 +78,11 @@ jobs:
           resources:
             - webapp.yaml
 
-          namePrefix: "${{ env.TRIGGER_BRANCH }}-"
+          namePrefix: "${{ github.ref_name }}-"
 
           labels:
             - pairs:
-                app.kubernetes.io/owner: ${{ env.TRIGGER_BRANCH }}
+                app.kubernetes.io/owner: ${{ github.ref_name }}
               includeSelectors: true
 
           images:
@@ -100,7 +97,7 @@ jobs:
           if [[ -n $(git status -s) ]]; then
             git add ${{ env.KUSTOMIZE_DIR }}/kustomization.yaml
             git commit -m "Update image tag to $TAG [skip ci]"
-            git push origin ${{ env.CONFIG_REPO_BRANCH }}
+            git push origin ${{ github.ref_name }}
             echo "Manifest updated and pushed successfully."
           else
             echo "No changes to commit."
