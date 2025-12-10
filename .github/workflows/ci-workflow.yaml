@@ -90,7 +90,7 @@ jobs:
 
           images:
           - name: myapp
-            newName: ${{ env.IMAGE_NAME }}
+            newName: ${{ env.REGISTRY_USERNAME }}/${{ env.IMAGE_NAME }}
             newTag: ${{ env.TAG }}
           EOF
 
