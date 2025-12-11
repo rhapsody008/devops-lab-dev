@@ -17,6 +17,7 @@ git commit -m "Updates for User01"
 git push origin user01
 ```
 4. Wait and see the changes reflected on web page e.g. [sample web app](https://10.54.93.221/user01)
+5. Showcase NKP logging & monitoring capabilities: Explore k8s Dashboard for deployment/pod status & Loki Explore on logs collection
 
 ## Workflow Explained
 

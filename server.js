@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = 3000;
 
-app.use(require('morgan')('dev'));
+app.use(require('morgan')('combined'));
 
 // CHANGE THIS STRING to test your pipeline!
 const message = "Hello from Nutanix!"; 
