@@ -10,27 +10,3 @@ spec:
   template:
     ref:
       branch: main
----
-apiVersion: dispatch.d2iq.io/v1alpha2
-kind: GitopsRepository
-metadata:
-  name: user02
-  namespace: nkp-devops-lab
-spec:
-  cloneUrl: https://gitlab.ntnxlab.local/lab/gitops-user02.git
-  secret: git
-  template:
-    ref:
-      branch: main
----
-apiVersion: dispatch.d2iq.io/v1alpha2
-kind: GitopsRepository
-metadata:
-  name: user03
-  namespace: nkp-devops-lab
-spec:
-  cloneUrl: https://gitlab.ntnxlab.local/lab/gitops-user03.git
-  secret: git
-  template:
-    ref:
-      branch: main

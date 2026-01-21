@@ -1,5 +1,5 @@
 # DevOps Lab Setup
-
+AEAAG-AAA62-W9AND-7DEJ7-H22FK-P8NJZ-DLS3W
 ## Prerequisite
 Gitlab, Harbor, NKP is running
 
@@ -18,7 +18,7 @@ sudo REGISTRY_FQDN=registry.ntnxlab.local DOMAIN_NAME=ntnxlab.local HARBOR_URL=h
 ```
 
 1. In Gitlab UI, Create PAT (sign in as root:ntnx/4NKP)
-glpat-IseIv8j-0OVexZkzgsrPC286MQp1OjEH.01.0w1lfnadv
+glpat-oqULfLM-yDhnf0x9SUqMMm86MQp1OjEH.01.0w1yn0eo6
 
 2. input variables and run `gitlab-setup.sh` from local laptop for the following:
 - install & register gitlab runner 
@@ -56,7 +56,7 @@ docker push registry.ntnxlab.local/library/kubectl-kustomize:latest
 
 Format manifest files to apply (Change variable values):
 ```
-GITLAB_PAT=<> ./base-setup.sh
+GITLAB_PAT=glpat-oqULfLM-yDhnf0x9SUqMMm86MQp1OjEH.01.0w1yn0eo6 ./base-setup.sh
 ```
 On Management Cluster:
 ```

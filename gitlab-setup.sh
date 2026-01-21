@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # --- 1. CONFIGURATION ---
-PAT="glpat-IseIv8j-0OVexZkzgsrPC286MQp1OjEH.01.0w1lfnadv"
+PAT="glpat-oqULfLM-yDhnf0x9SUqMMm86MQp1OjEH.01.0w1yn0eo6"
 GITLAB_URL="https://gitlab.ntnxlab.local"
 REGISTRY_URL="registry.ntnxlab.local"
 REGISTRY_PASSWORD="Harbor12345"
-VM_SSH="nutanix@10.55.11.170"  # Update with your VM SSH user/IP
+VM_SSH="nutanix@10.42.153.233"  # Update with your VM SSH user/IP
 GROUP_NAME="lab"
-NUM_USERS=3
+NUM_USERS=1
 
 echo "Starting GitLab Lab Setup..."
 

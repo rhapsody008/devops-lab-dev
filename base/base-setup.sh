@@ -35,7 +35,7 @@ GITLAB_CA_CRT_BASE64=$(echo -n "$GITLAB_CA_CRT" | base64)
 
 # Range for users
 START=1
-END=3
+END=1
 
 ###########
 # Project #
@@ -149,7 +149,7 @@ for i in $(seq "$START" "$END"); do
   - http:
       paths:
       - path: /${USER}
-        pathType: Exact
+        pathType: Prefix
         backend:
           service:
             name: ${USER}-web

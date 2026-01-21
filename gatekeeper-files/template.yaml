@@ -19,7 +19,7 @@ spec:
           type: object
           properties:
             ranges:
-              type: array
+              type: array 
               description: Allowed ranges for numbers of replicas.  Values are inclusive.
               items:
                 type: object
