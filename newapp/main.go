@@ -1,34 +1,34 @@
 package main
 
 import (
-    "flag"
-    "fmt"
-    "html/template"
-    "log"
-    "net/http"
+	"flag"
+	"fmt"
+	"html/template"
+	"log"
+	"net/http"
 )
 
 type Car struct {
-    Make  string
-    Model string
-    Price string
+	Make  string
+	Model string
+	Price string
 }
 
 var (
-    appVersion = flag.Int("version", 2, "App version")
+	appVersion = flag.Int("version", 2, "App version")
 )
 
 func main() {
-    flag.Parse()
+	flag.Parse()
 
-    cars := []Car{
-        {Make: "Toyota", Model: "Camry", Price: "$25,000"},
-        {Make: "Honda", Model: "Civic", Price: "$22,000"},
-        {Make: "Tesla", Model: "Model 3", Price: "$40,000"},
-        {Make: "Ford", Model: "Mustang", Price: "$35,000"},
-    }
+	cars := []Car{
+		{Make: "Toyota", Model: "Camry", Price: "$25,000"},
+		{Make: "Honda", Model: "Civic", Price: "$22,000"},
+		{Make: "Tesla", Model: "Model 3", Price: "$40,000"},
+		{Make: "Ford", Model: "Mustang", Price: "$35,000"},
+	}
 
-    tmpl := template.Must(template.New("index").Parse(`
+	tmpl := template.Must(template.New("index").Parse(`
 <!DOCTYPE html>
 <html>
 <head>
@@ -54,30 +54,30 @@ func main() {
 </html>
 `))
 
-    // Handle the root. Traefik sends /user01 here as "/"
-    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        // Safety check: ensure we only handle the root path
-        if r.URL.Path != "/" {
-            http.NotFound(w, r)
-            return
-        }
-        data := struct {
-            Version int
-            Cars    []Car
-        }{
-            Version: *appVersion,
-            Cars:    cars,
-        }
-        tmpl.Execute(w, data)
-    })
+	// Handle the root. Traefik sends /user01 here as "/"
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Safety check: ensure we only handle the root path
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		data := struct {
+			Version int
+			Cars    []Car
+		}{
+			Version: *appVersion,
+			Cars:    cars,
+		}
+		tmpl.Execute(w, data)
+	})
 
-    // Handle the buy route. Traefik sends /user01/buy here as "/buy"
-    http.HandleFunc("/buy", func(w http.ResponseWriter, r *http.Request) {
-        model := r.URL.Query().Get("model")
-        // Use relative path for the "Back" link too
-        fmt.Fprintf(w, "<h1>Successful bought!</h1><p>You bought a %s.</p><a href='./'>Back</a>", model)
-    })
+	// Handle the buy route. Traefik sends /user01/buy here as "/buy"
+	http.HandleFunc("/buy", func(w http.ResponseWriter, r *http.Request) {
+		model := r.URL.Query().Get("model")
+		// Use relative path for the "Back" link too
+		fmt.Fprintf(w, "<h1>Successful bought!</h1><p>You bought a %s.</p><a href='./'>Back</a>", model)
+	})
 
-    fmt.Printf("Starting server on :8080 with version %d\n", *appVersion)
-    log.Fatal(http.ListenAndServe(":8080", nil))
+	fmt.Printf("Starting server on :8080 with version %d\n", *appVersion)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

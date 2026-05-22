@@ -1,83 +1,83 @@
 #!/bin/bash
 
 # --- 1. CONFIGURATION ---
-PAT="glpat-oqULfLM-yDhnf0x9SUqMMm86MQp1OjEH.01.0w1yn0eo6"
+PAT="glpat-T5ABKrWP3lw2VIJ0AiiGqW86MQp1OjEH.01.0w1d53tby"
 GITLAB_URL="https://gitlab.ntnxlab.local"
 REGISTRY_URL="registry.ntnxlab.local"
 REGISTRY_PASSWORD="Harbor12345"
-VM_SSH="nutanix@10.42.153.233"  # Update with your VM SSH user/IP
+VM_SSH="nutanix@10.38.211.9"  # Update with your VM SSH user/IP
 GROUP_NAME="lab"
 NUM_USERS=1
 
 echo "Starting GitLab Lab Setup..."
 
-# Error handling function
-check_status() {
-    if [ $? -ne 0 ]; then
-        echo "Error during: $1. Exiting."
-        exit 1
-    fi
-}
+# # Error handling function
+# check_status() {
+#     if [ $? -ne 0 ]; then
+#         echo "Error during: $1. Exiting."
+#         exit 1
+#     fi
+# }
 
-# --- 2. ENSURE LOCAL FILES EXIST ---
-if [[ ! -f "./ci-templates/pipeline.yaml" || ! -f "./gitops/webapp.yaml" || ! -f "./gitops/kustomization.yaml" ]]; then
-    echo "Error: Required template files not found locally."
-    exit 1
-fi
+# # --- 2. ENSURE LOCAL FILES EXIST ---
+# if [[ ! -f "./ci-templates/pipeline.yaml" || ! -f "./gitops/webapp.yaml" || ! -f "./gitops/kustomization.yaml" ]]; then
+#     echo "Error: Required template files not found locally."
+#     exit 1
+# fi
 
-# --- 3. CREATE GROUP VIA API (FIRST STEP) ---
-echo "Checking/Creating group '$GROUP_NAME'..."
-GROUP_ID=$(curl -k --silent --header "PRIVATE-TOKEN: $PAT" "$GITLAB_URL/api/v4/groups" | jq -r ".[] | select(.path==\"$GROUP_NAME\") | .id")
+# # --- 3. CREATE GROUP VIA API (FIRST STEP) ---
+# echo "Checking/Creating group '$GROUP_NAME'..."
+# GROUP_ID=$(curl -k --silent --header "PRIVATE-TOKEN: $PAT" "$GITLAB_URL/api/v4/groups" | jq -r ".[] | select(.path==\"$GROUP_NAME\") | .id")
 
-if [ -z "$GROUP_ID" ] || [ "$GROUP_ID" == "null" ]; then
-    GROUP_RES=$(curl -k --silent --request POST --header "PRIVATE-TOKEN: $PAT" \
-         --data "name=$GROUP_NAME&path=$GROUP_NAME&visibility=private" \
-         "$GITLAB_URL/api/v4/groups")
-    GROUP_ID=$(echo $GROUP_RES | jq -r '.id')
-    echo "Created Group: $GROUP_NAME (ID: $GROUP_ID)"
-else
-    echo "Group already exists (ID: $GROUP_ID)"
-fi
-check_status "Group creation"
+# if [ -z "$GROUP_ID" ] || [ "$GROUP_ID" == "null" ]; then
+#     GROUP_RES=$(curl -k --silent --request POST --header "PRIVATE-TOKEN: $PAT" \
+#          --data "name=$GROUP_NAME&path=$GROUP_NAME&visibility=private" \
+#          "$GITLAB_URL/api/v4/groups")
+#     GROUP_ID=$(echo $GROUP_RES | jq -r '.id')
+#     echo "Created Group: $GROUP_NAME (ID: $GROUP_ID)"
+# else
+#     echo "Group already exists (ID: $GROUP_ID)"
+# fi
+# check_status "Group creation"
 
-# --- 4. RETRIEVE GROUP REGISTRATION TOKEN FROM VM ---
-# This pulls the specific token for the 'lab' group using the Rails console
-echo "Retrieving Group Runner Registration Token from VM..."
-GROUP_RUNNER_TOKEN=$(ssh $VM_SSH "sudo gitlab-rails runner \"print Group.find($GROUP_ID).runners_token\"" 2>/dev/null)
+# # --- 4. RETRIEVE GROUP REGISTRATION TOKEN FROM VM ---
+# # This pulls the specific token for the 'lab' group using the Rails console
+# echo "Retrieving Group Runner Registration Token from VM..."
+# GROUP_RUNNER_TOKEN=$(ssh $VM_SSH "sudo gitlab-rails runner \"print Group.find($GROUP_ID).runners_token\"" 2>/dev/null)
 
-if [ -z "$GROUP_RUNNER_TOKEN" ]; then
-    echo "Error: Failed to retrieve Group Runner Token via SSH."
-    exit 1
-fi
+# if [ -z "$GROUP_RUNNER_TOKEN" ]; then
+#     echo "Error: Failed to retrieve Group Runner Token via SSH."
+#     exit 1
+# fi
 
-# --- 5. VM CONFIGURATION: SSL & RUNNER REGISTRATION ---
-echo "Configuring SSL and registering Group Runner on VM..."
-ssh $VM_SSH << EOF
-  # Setup Registry SSL
-  openssl s_client -showcerts -connect ${REGISTRY_URL}:443 </dev/null 2>/dev/null | openssl x509 -outform PEM > /tmp/ca.crt
-  sudo mkdir -p /etc/docker/certs.d/${REGISTRY_URL}/
-  sudo cp /tmp/ca.crt /etc/docker/certs.d/${REGISTRY_URL}/ca.crt
-  sudo systemctl restart docker
+# # --- 5. VM CONFIGURATION: SSL & RUNNER REGISTRATION ---
+# echo "Configuring SSL and registering Group Runner on VM..."
+# ssh $VM_SSH << EOF
+#   # Setup Registry SSL
+#   openssl s_client -showcerts -connect ${REGISTRY_URL}:443 </dev/null 2>/dev/null | openssl x509 -outform PEM > /tmp/ca.crt
+#   sudo mkdir -p /etc/docker/certs.d/${REGISTRY_URL}/
+#   sudo cp /tmp/ca.crt /etc/docker/certs.d/${REGISTRY_URL}/ca.crt
+#   sudo systemctl restart docker
 
-  # Install GitLab Runner if not present
-  if ! command -v gitlab-runner &> /dev/null; then
-      curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh" | sudo bash
-      sudo apt-get install -y gitlab-runner
-  fi
+#   # Install GitLab Runner if not present
+#   if ! command -v gitlab-runner &> /dev/null; then
+#       curl -L "https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh" | sudo bash
+#       sudo apt-get install -y gitlab-runner
+#   fi
 
-  # Register Runner for the Group (Idempotent check by description)
-  if ! sudo gitlab-runner list 2>&1 | grep -q "group-lab-runner"; then
-      sudo gitlab-runner register --non-interactive --url "$GITLAB_URL/" --registration-token "$GROUP_RUNNER_TOKEN" \
-        --executor "docker" --docker-image "alpine" --docker-privileged \
-        --docker-volumes "/etc/docker/certs.d:/etc/docker/certs.d:ro" \
-        --tag-list "labci" --description "group-lab-runner"
-  fi
+#   # Register Runner for the Group (Idempotent check by description)
+#   if ! sudo gitlab-runner list 2>&1 | grep -q "group-lab-runner"; then
+#       sudo gitlab-runner register --non-interactive --url "$GITLAB_URL/" --registration-token "$GROUP_RUNNER_TOKEN" \
+#         --executor "docker" --docker-image "alpine" --docker-privileged \
+#         --docker-volumes "/etc/docker/certs.d:/etc/docker/certs.d:ro" \
+#         --tag-list "labci" --description "group-lab-runner"
+#   fi
 
-  # Set Concurrency
-  sudo sed -i 's/^concurrent = .*/concurrent = 15/' /etc/gitlab-runner/config.toml
-  sudo systemctl restart gitlab-runner
-EOF
-check_status "VM Infrastructure configuration"
+#   # Set Concurrency
+#   sudo sed -i 's/^concurrent = .*/concurrent = 15/' /etc/gitlab-runner/config.toml
+#   sudo systemctl restart gitlab-runner
+# EOF
+# check_status "VM Infrastructure configuration"
 
 # --- 6. SET GROUP CI/CD VARIABLES (REFACTORED FOR COMPATIBILITY) ---
 echo "Setting Group CI/CD Variables..."

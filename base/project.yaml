@@ -11,6 +11,6 @@ spec:
   namespaceName: nkp-devops-lab
   placement:
     clusters:
-    - name: nkp-dev
+    - name: zy-nkp-devops
   workspaceRef:
     name: default-workspace
